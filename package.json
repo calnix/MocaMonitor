@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "local-w3a-run": "ts-node actions/monitor.ts"
+  },
+  "devDependencies": {
+    "@tenderly/actions-test": "^0.2.19",
+    "@types/node": "^20.11.26",
+    "ts-node": "^10.9.2"
+  },
+  "dependencies": {
+    "ethers": "^6.11.1"
+  }
+}
