@@ -8,7 +8,12 @@
     },
     "dependencies": {
         "@tenderly/actions": "^0.2.0",
+<<<<<<< HEAD
         "ethers": "^6.11.1"
+=======
+        "ethers": "^6.11.1",
+        "@types/node": "^18.16.0"
+>>>>>>> 7793bb24dd5101377a5dcb70aa8183c1546ba340
     },
     "private": true
 }

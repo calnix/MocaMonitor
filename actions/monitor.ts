@@ -21,8 +21,8 @@ export const trackSupply: ActionFn = async (context: Context, event: Event) => {
 	const gatewayMumbai = context.gateways.getGateway(Network.MUMBAI);
   	
 	// Using the Ethers.js provider class to call the RPC URL
-  	const rpcSepolia = new ethers.providers.JsonRpcProvider(gatewaySepolia);
-  	const rpcMumbai = new ethers.providers.JsonRpcProvider(gatewayMumbai);
+  	const rpcSepolia = new ethers.JsonRpcProvider(gatewaySepolia);
+  	const rpcMumbai = new ethers.JsonRpcProvider(gatewayMumbai);
 
 	// Instantiate MocaToken contract
 	const mocaTokenContractAddress = '0xa2e400ce40c83270d8369ec971d0fc2e46d5056a'; 
