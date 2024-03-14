@@ -49,16 +49,8 @@ export const trackSupply: ActionFn = async (context: Context, event: Event) => {
 	// Call totalSupply on OFT
 	const oftBalance = await mocaOftContract.totalSupply();
 	console.log('OFT Balance:', oftBalance.toString());
-
-/*
-	const mV = rpcSepolia.mocaToken.balanceOf('0x....')	
-	const pV = rpcMumbai.mocaOft.totalSupply();
- 
-  	// Logging the block number of the latest mined block
-  	console.log(await mV);
-	console.log('.....');
-	console.log(await pV);
-*/
+	
+	// send alert
 	if(adapterBalance != oftBalance) {
 		
 		sendSlackAlert()
