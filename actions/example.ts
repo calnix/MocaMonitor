@@ -82,7 +82,7 @@ export const tracker: ActionFn = async (context: Context, event: Event) => {
 async function sendTransaction(context: Context, mocaTokenAdapterContract: ethers.Contract) {
 
 	// break bridge from ethereum side
-	const remoteChainID = 8453;		// base chainId
+	const remoteChainID = 30184;		// base LayerZeroId
 	
 	const txn = await mocaTokenAdapterContract.resetPeer(remoteChainID);	
 	console.log('Transaction created');
