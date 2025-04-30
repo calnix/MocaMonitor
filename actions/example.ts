@@ -10,6 +10,7 @@ import axios from 'axios';
 
 import MocaTokenAbi from './MocaTokenAbi.json';
 import MocaOftAbi from './MocaOftAbi.json';
+import MocaTokenAdapterAbi from './MocaTokenAdapterAbi.json';
 
 const MOCA_TOKEN_ADDRESS = "0xF944e35f95E819E752f3cCB5Faf40957d311e8c5";
 const MOCA_TOKEN_ADAPTER_ADDRESS = "0x2B11834Ed1FeAEd4b4b3a86A6F571315E25A884D";
@@ -30,11 +31,14 @@ export const tracker: ActionFn = async (context: Context, event: Event) => {
 	const adapterBalance = await mocaTokenContract.balanceOf(MOCA_TOKEN_ADAPTER_ADDRESS);
 	console.log('Adapter Balance:', adapterBalance.toString());
 
-    // Instantiate MocaOFT contract
+    // Instantiate MocaTokenAdapter + MocaOft contract
 		// Obtain the private key from context.secrets.get("oracle.addressPrivateKey")
 		const privateKey = await context.secrets.get("monitor.privateKey.Live");
-		const signer = new ethers.Wallet(privateKey, rpcBase);
-    const mocaOftContract = new ethers.Contract(MOCA_OFT_ADDRESS, MocaOftAbi, signer);
+		const signerBase = new ethers.Wallet(privateKey, rpcBase);
+    const mocaOftContract = new ethers.Contract(MOCA_OFT_ADDRESS, MocaOftAbi, signerBase);
+		
+		const signerMainnet = new ethers.Wallet(privateKey, rpcMainnet);
+    const mocaTokenAdapterContract = new ethers.Contract(MOCA_TOKEN_ADAPTER_ADDRESS, MocaTokenAdapterAbi, signerMainnet);
 	
    
     // Call totalSupply on OFT
@@ -48,7 +52,7 @@ export const tracker: ActionFn = async (context: Context, event: Event) => {
 
 		//break bridge
 		const message = 
-			`TENDERLY_BASE\n
+			`TENDERLY_ETH\n
 
 			 Adapter Balance: ${adapterBalance}
 			 OFT Balance: ${oftBalance}
@@ -58,32 +62,30 @@ export const tracker: ActionFn = async (context: Context, event: Event) => {
 		await notifyTelegram(message, context);
 
 		// trigger sendTransaction function
-		const hash = await sendTransaction(context, mocaOftContract);
-		console.log('Base txn hash:', hash.toString());
+		const hash = await sendTransaction(context, mocaTokenAdapterContract);
+		console.log('Ethereum txn hash:', hash.toString());
 		
 		const hashMessage = 
-			`TENDERLY_BASE\n
-		resetPeer() called successfully on Base.\n
-		https://basescan.org/tx/${hash.toString()}\n`;
+			`TENDERLY_ETH\n
+		resetPeer() called successfully on Ethereum.
+		https://etherscan.io/tx/${hash.toString()}\n`;
 		
 		await notifyTelegram(hashMessage, context);
 
 	} else {
 
-		await notifyTelegram('Tenderly_Base\n Balances are equal: LIVE TEST', context);
+		await notifyTelegram('Tenderly_Eth\n Balances are equal: LIVE TEST', context);
 		console.log('Balances are equal: LIVE TEST');
 	}
 }
 
-async function sendTransaction(context: Context, mocaOftContract: ethers.Contract) {
+async function sendTransaction(context: Context, mocaTokenAdapterContract: ethers.Contract) {
 
-	// break bridge from base side
-	const remoteChainID = 1;		// mainnet chainId
+	// break bridge from ethereum side
+	const remoteChainID = 8453;		// base chainId
 	
-	const txn = await mocaOftContract.resetPeer(remoteChainID);	
+	const txn = await mocaTokenAdapterContract.resetPeer(remoteChainID);	
 	console.log('Transaction created');
-
-
 
 	// wait for block
 	const receipt = await txn.wait(1);
