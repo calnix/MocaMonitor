@@ -13,15 +13,15 @@ import MocaOftAbi from './MocaOftAbi.json';
 
 const MOCA_TOKEN_ADDRESS = "0xF944e35f95E819E752f3cCB5Faf40957d311e8c5";
 const MOCA_TOKEN_ADAPTER_ADDRESS = "0x2B11834Ed1FeAEd4b4b3a86A6F571315E25A884D";
-const MOCA_OFT_ADDRESS = "0xF944e35f95E819E752f3cCB5Faf40957d311e8c5";
+const MOCA_OFT_ADDRESS = "0x2B11834Ed1FeAEd4b4b3a86A6F571315E25A884D";
 
 export const tracker: ActionFn = async (context: Context, event: Event) => {
 	const gatewayEthereum = context.gateways.getGateway(Network.MAINNET);
-	const gatewayPolygon = context.gateways.getGateway(Network.POLYGON);
+	const gatewayBase = context.gateways.getGateway(Network.BASE);
   	
 	// Using the Ethers.js provider class to call the RPC URL
   	const rpcMainnet = new ethers.JsonRpcProvider(gatewayEthereum);
-  	const rpcPolygon = new ethers.JsonRpcProvider(gatewayPolygon);
+  	const rpcBase = new ethers.JsonRpcProvider(gatewayBase);
 
 	// Instantiate MocaToken contract
 	const mocaTokenContract = new ethers.Contract(MOCA_TOKEN_ADDRESS, MocaTokenAbi, rpcMainnet);
@@ -33,7 +33,7 @@ export const tracker: ActionFn = async (context: Context, event: Event) => {
     // Instantiate MocaOFT contract
 		// Obtain the private key from context.secrets.get("oracle.addressPrivateKey")
 		const privateKey = await context.secrets.get("monitor.privateKey.Live");
-		const signer = new ethers.Wallet(privateKey, rpcPolygon);
+		const signer = new ethers.Wallet(privateKey, rpcBase);
     const mocaOftContract = new ethers.Contract(MOCA_OFT_ADDRESS, MocaOftAbi, signer);
 	
    
@@ -48,7 +48,7 @@ export const tracker: ActionFn = async (context: Context, event: Event) => {
 
 		//break bridge
 		const message = 
-			`TENDERLY_POLY\n
+			`TENDERLY_BASE\n
 
 			 Adapter Balance: ${adapterBalance}
 			 OFT Balance: ${oftBalance}
@@ -59,25 +59,25 @@ export const tracker: ActionFn = async (context: Context, event: Event) => {
 
 		// trigger sendTransaction function
 		const hash = await sendTransaction(context, mocaOftContract);
-		console.log('Polygon txn hash:', hash.toString());
+		console.log('Base txn hash:', hash.toString());
 		
 		const hashMessage = 
-			`TENDERLY_POLY\n
-		resetPeer() called successfully on Polygon.\n
-		https://polygonscan.com/tx/${hash.toString()}\n`;
+			`TENDERLY_BASE\n
+		resetPeer() called successfully on Base.\n
+		https://basescan.org/tx/${hash.toString()}\n`;
 		
 		await notifyTelegram(hashMessage, context);
 
 	} else {
 
-		await notifyTelegram('Tenderly_Poly\n Balances are equal: LIVE TEST', context);
+		await notifyTelegram('Tenderly_Base\n Balances are equal: LIVE TEST', context);
 		console.log('Balances are equal: LIVE TEST');
 	}
 }
 
 async function sendTransaction(context: Context, mocaOftContract: ethers.Contract) {
 
-	// break bridge from polygon side
+	// break bridge from base side
 	const remoteChainID = 1;		// mainnet chainId
 	
 	const txn = await mocaOftContract.resetPeer(remoteChainID);	
