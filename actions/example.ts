@@ -78,7 +78,7 @@ export const tracker: ActionFn = async (context: Context, event: Event) => {
 async function sendTransaction(context: Context, mocaOftContract: ethers.Contract) {
 
 	// break bridge from base side
-	const remoteChainID = 1;		// mainnet chainId
+	const remoteChainID = 30101;		// mainnet lazyerZero id
 	
 	const txn = await mocaOftContract.resetPeer(remoteChainID);	
 	console.log('Transaction created');
